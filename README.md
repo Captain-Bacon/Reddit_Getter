@@ -9,15 +9,14 @@ It supports both command-line operation for scripting and an interactive mode fo
 - [Reddit Content Extractor](#reddit-content-extractor)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
+  - [Understanding the Files](#understanding-the-files)
   - [Setup](#setup)
   - [Usage](#usage)
-    - [Command-Line Mode](#command-line-mode)
     - [Interactive Mode](#interactive-mode)
+    - [Command-Line Mode](#command-line-mode)
   - [Output Format](#output-format)
   - [Media Download Feature](#media-download-feature)
   - [Technical Notes on Data Retrieval](#technical-notes-on-data-retrieval)
-  - [Troubleshooting](#troubleshooting)
-  - [License](#license)
 
 ## Features
 
@@ -32,6 +31,29 @@ It supports both command-line operation for scripting and an interactive mode fo
 - Robust error handling and retry mechanism for API calls.
 - Configurable logging (console and file).
 
+## Understanding the Files
+
+This project is structured into several Python modules for clarity and maintainability. Here's a brief overview of the key files and folders:
+
+- **`README.md`**: (This file) Provides the main overview, setup, and basic usage instructions.
+- **`USAGE.md`**: Contains detailed examples and explanations for all command-line arguments.
+- **`requirements.txt`**: Lists the necessary Python libraries (dependencies) required to run the script. You install these using `pip install -r requirements.txt`.
+- **`.env.example`**: A template file for your API credentials. You should **rename this to `.env`** and fill in your details.
+- **`.gitignore`**: Specifies intentionally untracked files that Git should ignore (like `.env`, `venv/`, `__pycache__/`, log files, and output files).
+- **`LICENSE.md`**: Contains the MIT license information for the project.
+- **`CONTRIBUTING.md`**: Provides guidelines for contributing to the project (if present).
+
+- **`reddit_extractor.py`**: The main entry point of the application. This script handles command-line argument parsing, orchestrates the calls to other modules (authentication, data fetching, formatting, saving), and manages the interactive mode prompts.
+- **`auth.py`**: Handles the Reddit API authentication process using OAuth 2.0 (Code Flow). It initializes the connection to Reddit, manages refresh tokens, and guides the user through the first-time authorisation.
+- **`url_processor.py`**: Contains functions specifically for validating Reddit URLs and extracting the unique post ID from various URL formats.
+- **`data_retriever.py`**: Responsible for fetching the actual post and comment data from the Reddit API using the authenticated client provided by `auth.py`. Includes logic for handling comment sorting, depth limits, and retries for API errors.
+- **`output_formatter.py`**: Takes the raw data fetched by `data_retriever.py` and structures it into the final JSON format. It adds metadata (like script version, timestamps) and generates appropriate filenames for the output.
+- **`media_downloader.py`**: Handles the optional downloading of media files (images, GIFs, videos without sound) linked in the post or comments when running in interactive mode.
+- **`error_handler.py`**: Defines custom error classes specific to this application (e.g., `URLValidationError`, `APIAuthenticationError`) and includes helper functions for formatting user-friendly error messages and determining if an API error is retryable.
+
+- **`examples/`**: Contains example output JSON files and potentially corresponding media download folders, illustrating what the script produces.
+- **`Readme_Images/`**: Stores the images used within this `README.md` file for illustration.
+
 ## Setup
 
 1. **Clone the Repository:**
@@ -42,7 +64,7 @@ It supports both command-line operation for scripting and an interactive mode fo
     ```
 
 2. **Environment Setup:**
-    - **Using Conda (Recommended):**
+    - **Using Conda:**
 
         ```bash
         # Create a new Conda environment (e.g., named 'reddit_extractor')
@@ -66,7 +88,6 @@ It supports both command-line operation for scripting and an interactive mode fo
 
     - Go to your Reddit App Preferences: [https://www.reddit.com/prefs/apps/](https://www.reddit.com/prefs/apps/)
     - Scroll down to the bottom and click "are you a developer? create an app..."
-        - *(Image placeholder: Screenshot of the "create an app" button)*
     - Fill out the form:
         - **Name:** Give your app a descriptive name (e.g., "MyRedditContentExtractor").
         - **Type:** Select the "**installed app**" radio button.
@@ -81,9 +102,8 @@ It supports both command-line operation for scripting and an interactive mode fo
     - **Note on Logging In:** When the script directs you to Reddit to authorize the app, you can log in using your standard Reddit username and password, or by using Google/Apple sign-in if your Reddit account is linked to them.
 
 4. **Configure API Credentials (`.env` file):**
-    - In the project root directory, create a file named `.env`.
-    - Copy the contents from `env.example` into your new `.env` file.
-    - Fill in the following values:
+    - In the project root directory, you'll find a file named `.env.example`.
+    - Rename `.env.example` to `.env`, then open it and fill in the required values as described below:
 
         ```dotenv
         # .env file content (example)
@@ -94,25 +114,73 @@ It supports both command-line operation for scripting and an interactive mode fo
 
     - **`REDDIT_CLIENT_ID`**: Paste the Client ID you obtained from your Reddit app settings in the previous step.
     - **`REDDIT_USER_AGENT`**: Create a unique and descriptive User-Agent string. Reddit requires this for API access, and it helps them identify your script. A good format is `<AppName>/<Version> by /u/<YourRedditUsername>` (e.g., `MyRedditExtractor/0.1 by /u/MyRedditUsername`). **Replace `/u/YourRedditUsername` with your actual Reddit username.** Using a generic or non-unique User-Agent can lead to your script being rate-limited or blocked.
-    - **`REDDIT_REFRESH_TOKEN`**: Leave this blank initially. The first time you run the script (e.g., `python reddit_extractor.py`) without a `REDDIT_REFRESH_TOKEN` already set in your `.env` file, the script will guide you through a one-time authorization process to obtain one:
-        1. The script will display an authorization URL in your console. Copy this URL and open it in your web browser.
-        2. You will be taken to Reddit. Log in if prompted (you can use your standard Reddit credentials or linked Google/Apple accounts) and then explicitly authorize the application's requested permissions.
-        3. After successful authorization, Reddit will attempt to redirect your browser to a URL starting with `http://localhost:8080/...`.
-        4. **Important Clarification:** Your browser will likely display a "page not found," "connection refused," "this site can't be reached," or a similar error message for this `http://localhost:8080` address. **This is normal and expected.** The script doesn't run a web server; the redirect is simply a mechanism for Reddit to pass back an authorization `code` to you via the URL.
-        5. The crucial information is now in your browser's **address bar**. The URL will look something like this:
-            `http://localhost:8080/?state=SOME_RANDOM_STRING&code=VERY_LONG_AUTHORIZATION_CODE_STRING#_`
-            *(The `state` might be different, and the `code` will be a long string of characters and numbers.)*
-        6. You need to **copy the value of the `code` parameter** from this address bar URL. This is the entire string of characters that appears immediately after `code=` and before any subsequent `&` or `#` characters.
-        7. The script, in your console, will be prompting you to: `Enter the 'code' from the redirect URL:`. Paste the `code` you just copied from your browser's address bar here and press Enter.
-        8. If the `code` is valid, the script will use it to obtain a **Refresh Token** from Reddit. This **Refresh Token** will then be printed clearly in your console.
-        9. Copy this entire **Refresh Token** value.
-        10. Open your `.env` file and paste this token as the value for `REDDIT_REFRESH_TOKEN`. For example:
-            `REDDIT_REFRESH_TOKEN="actual_long_refresh_token_string_here"`
-        11. Save your `.env` file. Now, on subsequent runs, the script will use this refresh token to authenticate non-interactively.
+    - **`REDDIT_REFRESH_TOKEN`**: Leave this blank for now. The script will help you obtain this the first time you run it.
+
+5. **First-Time Authorisation (Getting the Refresh Token):**
+    The very first time you run the script (e.g., by typing `python reddit_extractor.py` in your terminal) with the `REDDIT_REFRESH_TOKEN` field empty in your `.env` file, the script needs your permission to access Reddit on your behalf. It does this using a standard process called OAuth.
+
+    > **What to expect:** If you've never used OAuth before, don't worry! You'll be copying and pasting a few things between your browser, terminal, and your `.env` file. The screenshots below show exactly what to do.
+
+    You will be guided through these steps in your terminal:
+
+    1. **Authorisation URL:** The script will display an authorisation URL in your console. Copy this URL.
+
+        ![Screenshot of terminal showing authorisation instructions and URL](Readme_Images/Reddit_OAuth_Instructions.png)
+
+    2. **Browser Authorisation:** Paste the URL into your web browser. You'll be taken to Reddit. Log in if necessary (you can use your standard Reddit login or linked Google/Apple accounts) and click "Allow" or "Accept" to authorise the script.
+    3. **Redirect to Localhost:** After authorisation, Reddit will redirect your browser to a URL starting with `http://localhost:8080/...`.
+    4. **"Site Can't Be Reached" - This is Normal:** Your browser will almost certainly display an error message like "This site can't be reached" or "Connection refused" for the `localhost:8080` address. **This is expected behaviour.** The script isn't running a web server; the redirect is simply how Reddit passes the necessary authorisation `code` back to you.
+
+        ![Screenshot of browser showing 'Site Can't Be Reached' and the address bar URL](Readme_Images/Reddit_Browser_Redirect.png)
+
+    5. **Copy the Authorisation Code:** The important part is now in your browser's **address bar**. Look for the `code=` parameter in the URL. You need to copy the **entire value** that comes *after* `code=` and *before* any subsequent `&` or the final `#_`.
+        *(Optional closer view of the code in the address bar)*
+
+        ![Close-up screenshot of the address bar highlighting the authorisation code value](Readme_Images/Reddit_OAuth_Code.png)
+
+    6. **Paste Code into Script:** Go back to your terminal. The script will be waiting with a prompt like: `Enter the 'code' from the redirect URL:`. Paste the `code` you just copied from the browser's address bar here and press Enter.
+
+        ![Screenshot of terminal showing the code being pasted after the prompt](Readme_Images/Reddit_OAuth_Paste_Code.png)
+
+    7. **Get the Refresh Token:** If the `code` is correct, the script will use it to get a long-term **Refresh Token** from Reddit. This token will be clearly printed in your terminal.
+
+        ![Screenshot of terminal showing the obtained Refresh Token value](Readme_Images/Reddit_OAuth_Copy_Token.png)
+
+    8. **Update `.env` File:** Copy this entire **Refresh Token** value. Open your `.env` file again and paste the token as the value for `REDDIT_REFRESH_TOKEN`. Make sure it's enclosed in quotes if it contains special characters, although it usually doesn't. For example:
+        `REDDIT_REFRESH_TOKEN="actual_long_refresh_token_string_here"`
+
+        ![Screenshot of the .env file showing the Refresh Token pasted in](Readme_Images/Reddit_OAuth_Paste_To_Env.png)
+
+    9. **Save `.env`:** Save the changes to your `.env` file.
+
+    Now, on all future runs, the script will use the saved Refresh Token to authenticate automatically without needing you to go through the browser authorisation again.
+
+    > **You're all set!** You can now run the script any time and it will authenticate automatically.
 
 ## Usage
 
 The script can be run via the command line or interactively.
+
+For detailed command-line examples and argument explanations, please see the dedicated [USAGE.md](USAGE.md) guide.
+
+### Interactive Mode
+
+If you run the script without any arguments (or only logging arguments like `-v`), it will enter interactive mode:
+
+```bash
+python reddit_extractor.py
+```
+
+The script will prompt you for:
+
+- The Reddit post URL.
+- Comment fetching preference (Number, `all`, or `no`).
+- Comment sort order (if fetching comments).
+- Comment depth limit (if fetching comments). Remember, depth is zero-indexed (0 = top-level only).
+- Output filename (optional, leave blank to auto-generate).
+- Whether to print output to the console instead of saving.
+- **Include verbose raw media details?** (Default: No) - Reddit's API often provides extensive technical details about media items (like *all* available resolutions/sizes for each image in a gallery, internal metadata objects, etc.). By default, the script includes only essential, structured information. Enabling this option includes *all* the raw data provided by the API. **Warning:** This can make the output JSON file significantly larger, especially for posts with galleries. Only enable this if you specifically need deep technical details or access to every single media version; otherwise, the default setting is recommended.
+- **Media Download Prompts (if applicable):** After the above steps, if downloadable media is detected in the post or comments, you will be asked if you want to download it and from where (post only, comments only, or both). See the [Media Download Feature](#media-download-feature) section for details.
 
 ### Command-Line Mode
 
@@ -161,25 +229,6 @@ python reddit_extractor.py --url <reddit_post_url> [options]
     ```bash
     python reddit_extractor.py --url <URL> --all-comments --depth 2 -v 
     ```
-
-### Interactive Mode
-
-If you run the script without any arguments (or only logging arguments like `-v`), it will enter interactive mode:
-
-```bash
-python reddit_extractor.py
-```
-
-The script will prompt you for:
-
-- The Reddit post URL.
-- Comment fetching preference (Number, `all`, or `no`).
-- Comment sort order (if fetching comments).
-- Comment depth limit (if fetching comments). Remember, depth is zero-indexed (0 = top-level only).
-- Output filename (optional, leave blank to auto-generate).
-- Whether to print output to the console instead of saving.
-- Whether to include verbose raw media details (can greatly increase JSON size).
-- **Media Download Prompts (if applicable):** After the above steps, if downloadable media is detected in the post or comments, you will be asked if you want to download it and from where (post only, comments only, or both). See the [Media Download Feature](#media-download-feature) section for details.
 
 ## Output Format
 
@@ -297,28 +346,4 @@ This script can optionally download media (images, GIFs, and some videos) from t
 
 This script utilises the [PRAW (Python Reddit API Wrapper)](https://praw.readthedocs.io/en/stable/) library to interact with the official Reddit API. Understanding a little about how PRAW fetches data, particularly comments, can be helpful:
 
-- **Comment Limits (`--comments N`):** When you specify a limit for top-level comments, the script first sets `submission.comment_limit` in PRAW. This provides an initial hint to PRAW for its first API request for comments. However, to ensure all potential comments are considered (especially those hidden behind "load more comments" placeholders), the script then calls `submission.comments.replace_more(limit=None)`. This PRAW method makes further API calls if necessary to expand those placeholders and retrieve more comments. Finally, the script iterates through the fetched top-level comments and stops once your specified limit (`N`) is reached. So, it's a combination of PRAW's fetching capabilities and the script's own iteration and counting to meet your exact requirement.
-
-- **Comment Depth (`--depth D`):** Control over comment reply depth is primarily handled by this script after PRAW fetches the comment data. When PRAW retrieves comments (and their replies via `replace_more()`), the Reddit API usually sends replies down to a certain default nesting level. PRAW does not offer a direct way to tell the API "only send replies N levels deep." Instead, this script recursively processes the comment tree provided by PRAW. If a reply's current depth in the tree (where 0 is a direct reply to the post, 1 is a reply to that, etc.) meets or exceeds your specified `--depth D`, the script includes that comment but provides an empty list for its `replies`. For example, `--depth 0` will give you only the top-level comments, and their `replies` field will be `[]`. `--depth 1` will give top-level comments, and their direct replies (depth 1 comments) will be included with their `replies` field set to `[]`.
-
-- **PRAW's Role:** In essence, PRAW handles the complexities of direct API communication, authentication, and provides convenient Python objects representing Reddit posts, comments, etc. This script then intelligently uses these PRAW objects, directs PRAW to fetch further data where needed (like expanding comments), and then processes, filters, and structures this information into the final JSON output according to your specified options.
-
-For more in-depth information on PRAW itself, please refer to the [official PRAW documentation](https://praw.readthedocs.io/en/stable/).
-
-## Troubleshooting
-
-- **Authentication Errors (`APIAuthenticationError`)**:
-  - Double-check your `REDDIT_CLIENT_ID` and `REDDIT_USER_AGENT` in your `.env` file.
-  - Ensure the `REDDIT_USER_AGENT` is unique and includes your Reddit username.
-  - If you have a `REDDIT_REFRESH_TOKEN` in your `.env` file, it might be invalid or expired. Try removing it (leave it blank) and re-running the script to go through the authorization process again and get a new refresh token.
-  - Confirm that the `REDIRECT_URI` in your Reddit app settings is exactly `http://localhost:8080`.
-- **Post Not Found (`PostRetrievalError`)**: Verify the Reddit URL is correct and the post hasn't been deleted or made private.
-- **Rate Limits**: If you encounter errors mentioning rate limits, wait a while before trying again. The script has a basic retry mechanism, but excessive requests can still be blocked.
-- **Dependencies Not Found (`ModuleNotFoundError`)**: Ensure you have activated the correct Conda environment or virtual environment (`source venv/bin/activate` or `conda activate <env_name>`) before running `pip install -r requirements.txt` and before running the script.
-- **File Saving Issues (`OutputError`)**: Check that you have write permissions in the directory where the script is trying to save the output file.
-
-For more detailed diagnostics, run the script with the `--verbose` flag and check the console output, or use `--log-file <filepath>` to save logs to a file.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+- **Comment Limits (`
