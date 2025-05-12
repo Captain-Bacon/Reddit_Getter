@@ -167,19 +167,98 @@ The script will prompt you for:
 
 ## Output Format
 
-The script outputs a JSON file containing:
+The script outputs a JSON file containing structured information about the post and its comments. Here's a simplified example illustrating the key fields:
 
-* `extractor_version`: Version of this script.
-* `extraction_timestamp_utc`: ISO 8601 timestamp of when the extraction occurred.
-* `source_url`: The permalink of the source Reddit post.
-* `post_details`: An object containing detailed information about the post itself (title, author, score, selftext, `media_info`, timestamps, etc.).
-* `comments`: A list of comment objects, nested according to the reply structure (up to the specified depth). Each comment includes author, body, score, timestamps, etc.
+```json
+{
+  // --- Metadata ---
+  "extractor_version": "0.1.0",           // Version of the script used
+  "extraction_timestamp_utc": "2025-05-12T10:59:23.026915+00:00", // ISO 8601 timestamp of extraction
+  "source_url": "https://www.reddit.com/r/aviation/comments/pcy6v7/...", // Permalink to the original Reddit post
 
-Timestamps (`created_utc`) are provided as Unix epoch seconds, and an ISO 8601 formatted version (`created_iso`) is also included for convenience.
+  // --- Post Details ---
+  "post_details": {
+    "id": "pcy6v7",                         // Reddit's unique post ID
+    "title": "What is your favourite fact about the legendary Lockheed SR-71...", // Post title
+    "author": "Mean-Juggernaut1560",        // Author's Reddit username
+    "created_utc": 1630105229.0,            // Unix epoch timestamp of post creation
+    "url": "https://i.redd.it/1j7mmhv8ezj71.jpg", // Direct URL (often to media, or self-post URL)
+    "permalink": "https://www.reddit.com/r/aviation/comments/pcy6v7/...", // Full permalink again
+    "domain": "i.redd.it",                   // Domain of the main URL (e.g., i.redd.it, self.subreddit, v.redd.it)
+    "selftext": "",                         // Body text of the post (empty if it's a link/media post)
+    "score": 4736,                          // Net score (upvotes - downvotes)
+    "upvote_ratio": 0.95,                   // Ratio of upvotes to total votes
+    "num_comments": 770,                    // Number of comments reported by Reddit at time of fetch
+    "is_original_content": false,           // Boolean flag
+    "is_self": false,                       // True if it's a text-only post (self-post)
+    "is_video": false,                      // True if Reddit identifies the main link as a video
+    "over_18": false,                       // NSFW flag
+    "spoiler": false,                       // Spoiler flag
+    "locked": false,                        // Locked post flag
+    "subreddit": "aviation",                // Subreddit name
+    "subreddit_id": "t5_2qhu8",             // Subreddit's unique ID
+    "gilded": 1,                            // Number of times gilded (Reddit Gold/Awards)
 
-Media information (`media_info` within `post_details`) is structured based on the type (e.g., `image`, `reddit_video`, `image_gallery_item`, `youtube_video_embed`).
+    // -- Media Information (list, as some posts have multiple items e.g., galleries) --
+    "media_info": [
+      {
+        "type": "image",                    // Type identifier (image, reddit_video, youtube_video_embed, etc.)
+        "url": "https://i.redd.it/1j7mmhv8ezj71.jpg", // Primary URL for the media
+        "width": 1242,                      // Media width (if available)
+        "height": 1291                      // Media height (if available)
+        // Other type-specific fields might appear here (e.g., fallback_url, hls_url for videos)
+      }
+    ],
+    "created_iso": "2021-08-27T23:00:29+00:00" // ISO 8601 formatted creation timestamp
+  },
 
-Sample output files can be found in the `examples/` directory of this repository.
+  // --- Comments Section (List of top-level comments) ---
+  "comments": [
+    { // --- Top-Level Comment Object ---
+      "id": "hamg6gr",                      // Comment's unique ID
+      "author": "Spiffytown",               // Comment author's username
+      "body": "Turning radius: About 5 states", // The comment text
+      "created_utc": 1630109018.0,          // Unix epoch timestamp of comment creation
+      "score": 1235,                        // Comment's net score
+      "is_submitter": false,                // True if comment author is the post author
+      "stickied": false,                    // True if comment is stickied by mods
+      "parent_id": "t3_pcy6v7",             // ID of the parent (t3_ prefix = post, t1_ prefix = another comment)
+      "permalink": "https://www.reddit.com/r/aviation/comments/pcy6v7/.../hamg6gr/", // Full permalink to comment
+      "depth": 0,                           // Depth level (0 = top-level reply to post)
+      "created_iso": "2021-08-28T00:03:38+00:00", // ISO 8601 formatted creation timestamp
+
+      // -- Replies to this comment (nested list, recursive structure) --
+      "replies": [
+        { // --- Reply Comment Object (Depth 1) ---
+          "id": "hamq4ae",
+          "author": "Mean-Juggernaut1560",
+          "body": "Turning radius: France",
+          "created_utc": 1630113950.0,
+          "score": 596,
+          "is_submitter": true,            // This comment IS by the post's original submitter
+          "stickied": false,
+          "parent_id": "t1_hamg6gr",        // Parent is the comment above (t1_ prefix)
+          "permalink": "https://www.reddit.com/r/aviation/comments/pcy6v7/.../hamq4ae/",
+          "depth": 1,                      // Depth level 1
+          "created_iso": "2021-08-28T01:25:50+00:00",
+          "replies": [
+            // Further nested replies would appear here...
+            // If --depth limit was reached, this list would be empty []
+          ]
+        },
+        // ... other replies to the top-level comment ...
+      ]
+    },
+    // ... other top-level comments ...
+  ]
+}
+```
+
+Key points about the structure:
+
+* **Timestamps:** `created_utc` provides the raw Unix epoch time, while `created_iso` offers a human-readable ISO 8601 format.
+* **Media:** `post_details.media_info` is a list containing objects for each detected media item (images, videos, embeds). The `type` field helps identify the kind of media. If the `--include-raw-media` flag is used, additional fields prefixed with `_raw_` containing extensive PRAW metadata will appear within `post_details`.
+* **Comments:** The `comments` list contains top-level comment objects. Each comment object has a `replies` field which is itself a list containing replies to *that* comment, creating a nested structure. The `depth` field indicates the nesting level (0 for direct replies to the post).
 
 ## Technical Notes on Data Retrieval
 
@@ -187,7 +266,7 @@ This script utilises the [PRAW (Python Reddit API Wrapper)](https://praw.readthe
 
 * **Comment Limits (`--comments N`):** When you specify a limit for top-level comments, the script first sets `submission.comment_limit` in PRAW. This provides an initial hint to PRAW for its first API request for comments. However, to ensure all potential comments are considered (especially those hidden behind "load more comments" placeholders), the script then calls `submission.comments.replace_more(limit=None)`. This PRAW method makes further API calls if necessary to expand those placeholders and retrieve more comments. Finally, the script iterates through the fetched top-level comments and stops once your specified limit (`N`) is reached. So, it's a combination of PRAW's fetching capabilities and the script's own iteration and counting to meet your exact requirement.
 
-* **Comment Depth (`--depth D`):** Control over comment reply depth is primarily handled by this script after PRAW fetches the comment data. When PRAW retrieves comments (and their replies via `replace_more()`), the Reddit API usually sends replies down to a certain default nesting level. PRAW does not offer a direct way to tell the API "only send replies N levels deep." Instead, this script recursively processes the comment tree provided by PRAW. If a reply's current depth in the tree (where 0 is a direct reply to the post, 1 is a reply to that, etc.) meets or exceeds your specified `--depth D`, the script includes that comment but provides an empty list for its replies. For example, `--depth 0` will give you only the top-level comments, and their `replies` field will be `[]`. `--depth 1` will give top-level comments, and their direct replies (depth 1 comments) will be included with their `replies` field set to `[]`.
+* **Comment Depth (`--depth D`):** Control over comment reply depth is primarily handled by this script after PRAW fetches the comment data. When PRAW retrieves comments (and their replies via `replace_more()`), the Reddit API usually sends replies down to a certain default nesting level. PRAW does not offer a direct way to tell the API "only send replies N levels deep." Instead, this script recursively processes the comment tree provided by PRAW. If a reply's current depth in the tree (where 0 is a direct reply to the post, 1 is a reply to that, etc.) meets or exceeds your specified `--depth D`, the script includes that comment but provides an empty list for its `replies`. For example, `--depth 0` will give you only the top-level comments, and their `replies` field will be `[]`. `--depth 1` will give top-level comments, and their direct replies (depth 1 comments) will be included with their `replies` field set to `[]`.
 
 * **PRAW's Role:** In essence, PRAW handles the complexities of direct API communication, authentication, and provides convenient Python objects representing Reddit posts, comments, etc. This script then intelligently uses these PRAW objects, directs PRAW to fetch further data where needed (like expanding comments), and then processes, filters, and structures this information into the final JSON output according to your specified options.
 
