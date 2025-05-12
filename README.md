@@ -17,6 +17,9 @@ It supports both command-line operation for scripting and an interactive mode fo
   - [Output Format](#output-format)
   - [Media Download Feature](#media-download-feature)
   - [Technical Notes on Data Retrieval](#technical-notes-on-data-retrieval)
+  - [Troubleshooting](#troubleshooting)
+  - [License](#license)
+  - [Acknowledgements](#acknowledgements)
 
 ## Features
 
@@ -40,7 +43,7 @@ This project is structured into several Python modules for clarity and maintaina
 - **`requirements.txt`**: Lists the necessary Python libraries (dependencies) required to run the script. You install these using `pip install -r requirements.txt`.
 - **`.env.example`**: A template file for your API credentials. You should **rename this to `.env`** and fill in your details.
 - **`.gitignore`**: Specifies intentionally untracked files that Git should ignore (like `.env`, `venv/`, `__pycache__/`, log files, and output files).
-- **`LICENSE.md`**: Contains the MIT license information for the project.
+- **`LICENSE.md`**: Contains the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License information for the project.
 - **`CONTRIBUTING.md`**: Provides guidelines for contributing to the project (if present).
 
 - **`reddit_extractor.py`**: The main entry point of the application. This script handles command-line argument parsing, orchestrates the calls to other modules (authentication, data fetching, formatting, saving), and manages the interactive mode prompts.
@@ -346,4 +349,35 @@ This script can optionally download media (images, GIFs, and some videos) from t
 
 This script utilises the [PRAW (Python Reddit API Wrapper)](https://praw.readthedocs.io/en/stable/) library to interact with the official Reddit API. Understanding a little about how PRAW fetches data, particularly comments, can be helpful:
 
-- **Comment Limits (`
+- **Comment Limits (`--comments N`):** When you specify a limit for top-level comments, the script first sets `submission.comment_limit` in PRAW. This provides an initial hint to PRAW for its first API request for comments. However, to ensure all potential comments are considered (especially those hidden behind "load more comments" placeholders), the script then calls `submission.comments.replace_more(limit=None)`. This PRAW method makes further API calls if necessary to expand those placeholders and retrieve more comments. Finally, the script iterates through the fetched top-level comments and stops once your specified limit (`N`) is reached. So, it's a combination of PRAW's fetching capabilities and the script's own iteration and counting to meet your exact requirement.
+
+- **Comment Depth (`--depth D`):** Control over comment reply depth is primarily handled by this script after PRAW fetches the comment data. When PRAW retrieves comments (and their replies via `replace_more()`), the Reddit API usually sends replies down to a certain default nesting level. PRAW does not offer a direct way to tell the API "only send replies N levels deep." Instead, this script recursively processes the comment tree provided by PRAW. If a reply's current depth in the tree (where 0 is a direct reply to the post, 1 is a reply to that, etc.) meets or exceeds your specified `--depth D`, the script includes that comment but provides an empty list for its `replies`. For example, `--depth 0` will give you only the top-level comments, and their `replies` field will be `[]`. `--depth 1` will give top-level comments, and their direct replies (depth 1 comments) will be included with their `replies` field set to `[]`.
+
+- **PRAW's Role:** In essence, PRAW handles the complexities of direct API communication, authentication, and provides convenient Python objects representing Reddit posts, comments, etc. This script then intelligently uses these PRAW objects, directs PRAW to fetch further data where needed (like expanding comments), and then processes, filters, and structures this information into the final JSON output according to your specified options.
+
+For more in-depth information on PRAW itself, please refer to the [official PRAW documentation](https://praw.readthedocs.io/en/stable/).
+
+## Troubleshooting
+
+- **Authentication Errors (`APIAuthenticationError`)**:
+  - Double-check your `REDDIT_CLIENT_ID` and `REDDIT_USER_AGENT` in your `.env` file.
+  - Ensure the `REDDIT_USER_AGENT` is unique and includes your Reddit username.
+  - If you have a `REDDIT_REFRESH_TOKEN` in your `.env` file, it might be invalid or expired. Try removing it (leave it blank) and re-running the script to go through the authorization process again and get a new refresh token.
+  - Confirm that the `REDIRECT_URI` in your Reddit app settings is exactly `http://localhost:8080`.
+- **Post Not Found (`PostRetrievalError`)**: Verify the Reddit URL is correct and the post hasn't been deleted or made private.
+- **Rate Limits**: If you encounter errors mentioning rate limits, wait a while before trying again. The script has a basic retry mechanism, but excessive requests can still be blocked.
+- **Dependencies Not Found (`ModuleNotFoundError`)**: Ensure you have activated the correct Conda environment or virtual environment (`source venv/bin/activate` or `conda activate <env_name>`) before running `pip install -r requirements.txt` and before running the script.
+- **File Saving Issues (`OutputError`)**: Check that you have write permissions in the directory where the script is trying to save the output file.
+
+For more detailed diagnostics, run the script with the `--verbose` flag and check the console output, or use `--log-file <filepath>` to save logs to a file.
+
+## License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License. See the [LICENSE.md](LICENSE.md) file for details.
+
+## Acknowledgements
+
+This script relies heavily on the excellent PRAW (Python Reddit API Wrapper) library. Many thanks to the PRAW developers for their work.
+
+- PRAW GitHub Repository: [https://github.com/praw-dev/praw](https://github.com/praw-dev/praw)
+- PRAW Documentation (Stable): [https://praw.readthedocs.io/en/stable/](https://praw.readthedocs.io/en/stable/)
