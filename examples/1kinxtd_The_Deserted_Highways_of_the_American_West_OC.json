@@ -1,0 +1,192 @@
+{
+    "extractor_version": "0.1.0",
+    "extraction_timestamp_utc": "2025-05-09T18:39:25.592906+00:00",
+    "source_url": "https://www.reddit.com/r/pics/comments/1kinxtd/the_deserted_highways_of_the_american_west_oc/",
+    "post_details": {
+        "id": "1kinxtd",
+        "title": "The Deserted Highways of the American West [OC]",
+        "author": "commiedeschris",
+        "created_utc": 1746811030.0,
+        "url": "https://www.reddit.com/gallery/1kinxtd",
+        "permalink": "https://www.reddit.com/r/pics/comments/1kinxtd/the_deserted_highways_of_the_american_west_oc/",
+        "domain": "reddit.com",
+        "selftext": "",
+        "score": 997,
+        "upvote_ratio": 0.98,
+        "num_comments": 117,
+        "is_original_content": false,
+        "is_self": false,
+        "is_video": false,
+        "stickied": false,
+        "over_18": false,
+        "spoiler": false,
+        "locked": false,
+        "subreddit": "pics",
+        "subreddit_id": "t5_2qh0u",
+        "gilded": 0,
+        "media_info": [
+            {
+                "type": "image_gallery_item",
+                "id": "ii9as8uyhsze1",
+                "url": "https://preview.redd.it/ii9as8uyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=2d302d4cbf9a757a6f9503fab425ab5be88eb182",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "jcwuw9uyhsze1",
+                "url": "https://preview.redd.it/jcwuw9uyhsze1.jpg?width=3089&format=pjpg&auto=webp&s=b689c6433010ca507272789bbd52f9b06b524367",
+                "width": 3089,
+                "height": 2048,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "xn8xjwuyhsze1",
+                "url": "https://preview.redd.it/xn8xjwuyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=4fe2d703d87ca5f9fef8865346b7ab98d8bb5e65",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "wev4aouyhsze1",
+                "url": "https://preview.redd.it/wev4aouyhsze1.jpg?width=3110&format=pjpg&auto=webp&s=2496955d9da0235eedc7357f3512922501cd25f8",
+                "width": 3110,
+                "height": 2062,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "6esa0puyhsze1",
+                "url": "https://preview.redd.it/6esa0puyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=86c0d3318fb2e937465841f2f64c04f1041d1a6d",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "ohmqlbuyhsze1",
+                "url": "https://preview.redd.it/ohmqlbuyhsze1.jpg?width=3124&format=pjpg&auto=webp&s=cb5fd4058c7b8c7a336dbc4007e960d3cb74f1e2",
+                "width": 3124,
+                "height": 2071,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "48vx09uyhsze1",
+                "url": "https://preview.redd.it/48vx09uyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=35310f5b5d6a3e5afeea05a4401c85e3e7280774",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "zdcc3s1zhsze1",
+                "url": "https://preview.redd.it/zdcc3s1zhsze1.jpg?width=3024&format=pjpg&auto=webp&s=676f06641d81117130e4250b45024d7512243202",
+                "width": 3024,
+                "height": 2005,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "gettfbuyhsze1",
+                "url": "https://preview.redd.it/gettfbuyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=5f2ec21b8064130c7a97802d6f14f3d2bead3b52",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "rrq759uyhsze1",
+                "url": "https://preview.redd.it/rrq759uyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=255227de6fb4cd3310b200520801186e1ffb924f",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "ltnxaauyhsze1",
+                "url": "https://preview.redd.it/ltnxaauyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=39b8024e08e49e6b40fce4b16e28f7a8e39c616c",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "l9l3fauyhsze1",
+                "url": "https://preview.redd.it/l9l3fauyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=94ed6f77758174f0e3d611c90aeacd9e143fd821",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "zcuaxpuyhsze1",
+                "url": "https://preview.redd.it/zcuaxpuyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=84a535e401b3f82b1a1acced0efc8a8db907c1ac",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "zfurpguyhsze1",
+                "url": "https://preview.redd.it/zfurpguyhsze1.jpg?width=3130&format=pjpg&auto=webp&s=a0c84888d2e4716d57ff336b2ae5b565e45dbefa",
+                "width": 3130,
+                "height": 2075,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "6abcy8uyhsze1",
+                "url": "https://preview.redd.it/6abcy8uyhsze1.jpg?width=3024&format=pjpg&auto=webp&s=45755274a6e7f84a708eb82a69cb7a5505ffb1f7",
+                "width": 3024,
+                "height": 2005,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "zohlo8uyhsze1",
+                "url": "https://preview.redd.it/zohlo8uyhsze1.jpg?width=3104&format=pjpg&auto=webp&s=07401f977d999dbb720358bac4fdf69bd5897e9d",
+                "width": 3104,
+                "height": 2058,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "pqiiyouyhsze1",
+                "url": "https://preview.redd.it/pqiiyouyhsze1.jpg?width=3024&format=pjpg&auto=webp&s=89d5cd50351b71d8b38de0e837da74996e3101b0",
+                "width": 3024,
+                "height": 2005,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "4d16z9uyhsze1",
+                "url": "https://preview.redd.it/4d16z9uyhsze1.jpg?width=3117&format=pjpg&auto=webp&s=eef20da19d0940b2783b269efe213504a196a53c",
+                "width": 3117,
+                "height": 2066,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "vi7c4quyhsze1",
+                "url": "https://preview.redd.it/vi7c4quyhsze1.jpg?width=2960&format=pjpg&auto=webp&s=bc05c575eea2ebdb1f48751b6315393d48d7546f",
+                "width": 2960,
+                "height": 1963,
+                "mimetype": "image/jpg"
+            },
+            {
+                "type": "image_gallery_item",
+                "id": "j6pe2puyhsze1",
+                "url": "https://preview.redd.it/j6pe2puyhsze1.jpg?width=3024&format=pjpg&auto=webp&s=8ba063733bcbacfa2ae8010753dcc9e266618482",
+                "width": 3024,
+                "height": 2005,
+                "mimetype": "image/jpg"
+            }
+        ],
+        "created_iso": "2025-05-09T17:17:10+00:00"
+    },
+    "comments": []
+}

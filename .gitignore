@@ -42,6 +42,7 @@ ENV/
 
 # JSON Output Files
 *.json
+!examples/**/*.json
 
 # IDE Files
 #.*

@@ -410,6 +410,7 @@ def main() -> int:
     # Basic logging config first, might be overridden by parse_arguments
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s [%(name)s] %(message)s', handlers=[logging.StreamHandler(sys.stdout)])
     
+    args = None # Define args here to ensure it's accessible in the final except block
     exit_code = 0
     try:
         args = parse_arguments()
@@ -431,18 +432,54 @@ def main() -> int:
             raise URLValidationError(f"Could not extract post ID from URL: {args.url}")
         logger.info(f"Extracted Post ID: {post_id}")
 
-        logger.info("Initializing Reddit client...")
-        reddit_client = initialize_reddit_client()
-        logger.info("Reddit client initialized.")
+        reddit_client = None # Initialize to None
+        try:
+            logger.info("Initializing Reddit client...")
+            reddit_client = initialize_reddit_client()
+            logger.info("Reddit client initialized.")
+        except ConfigError as ce:
+            # Specific handling for missing config directly during initialization
+            logger.error(f"Configuration Error during client initialisation: {ce}", exc_info=True)
+            if args.interactive_mode:
+                print("\n--- Configuration Required ---", file=sys.stderr)
+                print("It looks like the script is not configured correctly.", file=sys.stderr)
+                print(f"Error details: {ce}", file=sys.stderr)
+                print("Please ensure you have created a `.env` file in the script's directory.", file=sys.stderr)
+                print("This file needs to contain your Reddit API credentials:", file=sys.stderr)
+                print("  REDDIT_CLIENT_ID=\"YOUR_CLIENT_ID\"", file=sys.stderr)
+                print("  REDDIT_USER_AGENT=\"YourAppName/1.0 by /u/YourRedditUsername\"", file=sys.stderr)
+                print("For detailed setup instructions, please refer to the 'Setting Up Your Reddit Application' and 'Configure API Credentials' sections in the README.md file.", file=sys.stderr)
+                print("----------------------------\n", file=sys.stderr)
+                exit_code = 1
+                return exit_code # Exit directly after interactive message
+            else:
+                # In script mode, let the standard error handling catch it
+                raise ce 
+        except APIAuthenticationError as auth_err:
+            # Handle auth errors that might occur during init separately if needed
+            # Or let the main handler catch them. For now, re-raise.
+             logger.error(f"API Authentication Error during client initialisation: {auth_err}", exc_info=True)
+             raise auth_err
+
 
         # Fetch the submission object once
         logger.info(f"Fetching submission object for post ID: {post_id}")
         submission = reddit_client.submission(id=post_id)
         # Ensure submission is loaded (PRAW does this lazily)
         # Accessing an attribute like submission.title will trigger the load.
-        if not hasattr(submission, 'title') or submission.title is None:
-            raise PostRetrievalError(f"Failed to load submission details for post ID {post_id}. The post may be deleted or inaccessible.")
+        # Check if submission exists and hasn't been deleted (author is None)
+        try:
+            # Accessing author triggers fetch; handles deleted posts where author is None
+            _ = submission.author 
+            # Check if title exists as well, just in case
+            if not hasattr(submission, 'title') or submission.title is None:
+                 raise PostRetrievalError(f"Failed to load submission details for post ID {post_id}. The post may be deleted, private, or inaccessible.")
+        except Exception as sub_error: # Catch prawcore NotFound, etc.
+            logger.error(f"Error accessing submission details for {post_id}: {sub_error}", exc_info=True)
+            raise PostRetrievalError(f"Failed to load submission details for post ID {post_id}. The post may be deleted, private, or inaccessible.") from sub_error
+
         logger.info(f"Submission object for '{submission.title}' fetched.")
+
 
         logger.info(f"Fetching post data for {post_id}...")
         post_data = fetch_post_data(reddit_client, post_id, include_raw_media_details=args.include_raw_media)
@@ -558,9 +595,13 @@ def main() -> int:
         logger.info("--- Reddit Content Extractor Finished Successfully ---")
 
     except RedditExtractorError as e:
+        # Only attempt to use args if it was successfully assigned
+        is_interactive = args.interactive_mode if args else False 
         user_msg = format_user_error_message(e)
         logger.error(f"A known application error occurred: {user_msg}", exc_info=True)
-        print(f"\nError: {user_msg}\nPlease check the logs for more details if a log file was specified.", file=sys.stderr)
+        # Avoid printing the detailed interactive message again if it was a ConfigError handled above
+        if not (is_interactive and isinstance(e, ConfigError)):
+             print(f"\nError: {user_msg}\nPlease check the logs for more details if a log file was specified.", file=sys.stderr)
         exit_code = 1 
     except Exception as e: 
         user_msg = format_user_error_message(e)
