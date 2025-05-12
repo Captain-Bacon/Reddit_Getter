@@ -4,18 +4,33 @@ This Python script extracts the main post content and associated comments from a
 
 It supports both command-line operation for scripting and an interactive mode for ease of use.
 
+## Table of Contents
+
+- [Reddit Content Extractor](#reddit-content-extractor)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Setup](#setup)
+  - [Usage](#usage)
+    - [Command-Line Mode](#command-line-mode)
+    - [Interactive Mode](#interactive-mode)
+  - [Output Format](#output-format)
+  - [Media Download Feature](#media-download-feature)
+  - [Technical Notes on Data Retrieval](#technical-notes-on-data-retrieval)
+  - [Troubleshooting](#troubleshooting)
+  - [License](#license)
+
 ## Features
 
-* Extracts post details (title, author, score, selftext, media info, etc.).
-* Extracts comments and their replies up to a specified depth or all replies.
-* Supports limiting the number of top-level comments fetched.
-* Supports various comment sorting orders (best, top, new, etc.).
-* Handles different types of media associated with posts (images, videos, galleries, embeds).
-* Provides output in a structured JSON format, including metadata.
-* Command-line interface for automation.
-* Interactive mode for guided input.
-* Robust error handling and retry mechanism for API calls.
-* Configurable logging (console and file).
+- Extracts post details (title, author, score, selftext, media info, etc.).
+- Extracts comments and their replies up to a specified depth or all replies.
+- Supports limiting the number of top-level comments fetched.
+- Supports various comment sorting orders (best, top, new, etc.).
+- Handles different types of media associated with posts (images, videos, galleries, embeds).
+- Provides output in a structured JSON format, including metadata.
+- Command-line interface for automation.
+- Interactive mode for guided input.
+- Robust error handling and retry mechanism for API calls.
+- Configurable logging (console and file).
 
 ## Setup
 
@@ -27,7 +42,7 @@ It supports both command-line operation for scripting and an interactive mode fo
     ```
 
 2. **Environment Setup:**
-    * **Using Conda (Recommended):**
+    - **Using Conda (Recommended):**
 
         ```bash
         # Create a new Conda environment (e.g., named 'reddit_extractor')
@@ -38,7 +53,7 @@ It supports both command-line operation for scripting and an interactive mode fo
         pip install -r requirements.txt
         ```
 
-    * **Using venv:**
+    - **Using venv:**
 
         ```bash
         python3 -m venv venv
@@ -49,26 +64,26 @@ It supports both command-line operation for scripting and an interactive mode fo
 3. **Setting Up Your Reddit Application:**
     To use this script, you need to register a "script" type application on Reddit. This will provide you with the necessary API credentials.
 
-    * Go to your Reddit App Preferences: [https://www.reddit.com/prefs/apps/](https://www.reddit.com/prefs/apps/)
-    * Scroll down to the bottom and click "are you a developer? create an app..."
-        * *(Image placeholder: Screenshot of the "create an app" button)*
-    * Fill out the form:
-        * **Name:** Give your app a descriptive name (e.g., "MyRedditContentExtractor").
-        * **Type:** Select the "**installed app**" radio button.
-            * *(Image placeholder: Screenshot highlighting the "installed app" option)*
-        * **Description:** (Optional) You can leave this blank or add a short description.
-        * **About URL:** (Optional) You can leave this blank or link to this GitHub repository.
-        * **Redirect URI:** This is important! Enter `http://localhost:8080`. This exact URI is used by the script to receive the authorization code from Reddit.
-    * Click the "create app" button.
-    * After creation, your app will be listed. Under its name, you will see a string of characters – this is your **Client ID**. A "secret" may also be displayed, but **this script does not use the client secret.**
-        * *(Image placeholder: Screenshot of an app entry showing where the Client ID is located)*
-    * Make a note of your **Client ID**. You'll need it for the next step.
-    * **Note on Logging In:** When the script directs you to Reddit to authorize the app, you can log in using your standard Reddit username and password, or by using Google/Apple sign-in if your Reddit account is linked to them.
+    - Go to your Reddit App Preferences: [https://www.reddit.com/prefs/apps/](https://www.reddit.com/prefs/apps/)
+    - Scroll down to the bottom and click "are you a developer? create an app..."
+        - *(Image placeholder: Screenshot of the "create an app" button)*
+    - Fill out the form:
+        - **Name:** Give your app a descriptive name (e.g., "MyRedditContentExtractor").
+        - **Type:** Select the "**installed app**" radio button.
+            - *(Image placeholder: Screenshot highlighting the "installed app" option)*
+        - **Description:** (Optional) You can leave this blank or add a short description.
+        - **About URL:** (Optional) You can leave this blank or link to this GitHub repository.
+        - **Redirect URI:** This is important! Enter `http://localhost:8080`. This exact URI is used by the script to receive the authorization code from Reddit.
+    - Click the "create app" button.
+    - After creation, your app will be listed. Under its name, you will see a string of characters – this is your **Client ID**. A "secret" may also be displayed, but **this script does not use the client secret.**
+        - *(Image placeholder: Screenshot of an app entry showing where the Client ID is located)*
+    - Make a note of your **Client ID**. You'll need it for the next step.
+    - **Note on Logging In:** When the script directs you to Reddit to authorize the app, you can log in using your standard Reddit username and password, or by using Google/Apple sign-in if your Reddit account is linked to them.
 
 4. **Configure API Credentials (`.env` file):**
-    * In the project root directory, create a file named `.env`.
-    * Copy the contents from `env.example` into your new `.env` file.
-    * Fill in the following values:
+    - In the project root directory, create a file named `.env`.
+    - Copy the contents from `env.example` into your new `.env` file.
+    - Fill in the following values:
 
         ```dotenv
         # .env file content (example)
@@ -77,9 +92,9 @@ It supports both command-line operation for scripting and an interactive mode fo
         REDDIT_REFRESH_TOKEN=""
         ```
 
-    * **`REDDIT_CLIENT_ID`**: Paste the Client ID you obtained from your Reddit app settings in the previous step.
-    * **`REDDIT_USER_AGENT`**: Create a unique and descriptive User-Agent string. Reddit requires this for API access, and it helps them identify your script. A good format is `<AppName>/<Version> by /u/<YourRedditUsername>` (e.g., `MyRedditExtractor/0.1 by /u/MyRedditUsername`). **Replace `/u/YourRedditUsername` with your actual Reddit username.** Using a generic or non-unique User-Agent can lead to your script being rate-limited or blocked.
-    * **`REDDIT_REFRESH_TOKEN`**: Leave this blank initially. The first time you run the script (e.g., `python reddit_extractor.py`) without a `REDDIT_REFRESH_TOKEN` already set in your `.env` file, the script will guide you through a one-time authorization process to obtain one:
+    - **`REDDIT_CLIENT_ID`**: Paste the Client ID you obtained from your Reddit app settings in the previous step.
+    - **`REDDIT_USER_AGENT`**: Create a unique and descriptive User-Agent string. Reddit requires this for API access, and it helps them identify your script. A good format is `<AppName>/<Version> by /u/<YourRedditUsername>` (e.g., `MyRedditExtractor/0.1 by /u/MyRedditUsername`). **Replace `/u/YourRedditUsername` with your actual Reddit username.** Using a generic or non-unique User-Agent can lead to your script being rate-limited or blocked.
+    - **`REDDIT_REFRESH_TOKEN`**: Leave this blank initially. The first time you run the script (e.g., `python reddit_extractor.py`) without a `REDDIT_REFRESH_TOKEN` already set in your `.env` file, the script will guide you through a one-time authorization process to obtain one:
         1. The script will display an authorization URL in your console. Copy this URL and open it in your web browser.
         2. You will be taken to Reddit. Log in if prompted (you can use your standard Reddit credentials or linked Google/Apple accounts) and then explicitly authorize the application's requested permissions.
         3. After successful authorization, Reddit will attempt to redirect your browser to a URL starting with `http://localhost:8080/...`.
@@ -109,17 +124,17 @@ python reddit_extractor.py --url <reddit_post_url> [options]
 
 **Common Options:**
 
-* `--url <URL>`: (Required) The full URL of the Reddit post.
-* `--comments <N>`: Get the top `N` comments. Use `0` for no comments.
-* `--all-comments`: Get all top-level comments (default if no comment option specified).
-* `--no-comments`: Do not fetch any comments.
-* `--sort <order>`: Comment sort order (`best`, `top`, `new`, `controversial`, `old`, `q&a`). Default: `best`.
-* `--depth <D>`: Maximum reply depth to fetch. Default: all depths. Note: Depth is zero-indexed; `--depth 0` fetches top-level comments only (no replies), `--depth 1` fetches top-level comments and their direct replies, etc.
-* `--output <filename.json>` or `-o <filename.json>`: Specify the output JSON filename. If omitted, a name is generated based on post ID and title.
-* `--print`: Print the final JSON to the console instead of saving to a file.
-* `--verbose` or `-v`: Enable detailed DEBUG level logging to the console.
-* `--log-file <filepath>`: Save logs to the specified file (appends).
-* `--include-raw-media`: Include extensive raw media metadata from PRAW (e.g., all image resolutions, full gallery data). This can significantly increase file size. Off by default.
+- `--url <URL>`: (Required) The full URL of the Reddit post.
+- `--comments <N>`: Get the top `N` comments. Use `0` for no comments.
+- `--all-comments`: Get all top-level comments (default if no comment option specified).
+- `--no-comments`: Do not fetch any comments.
+- `--sort <order>`: Comment sort order (`best`, `top`, `new`, `controversial`, `old`, `q&a`). Default: `best`.
+- `--depth <D>`: Maximum reply depth to fetch. Default: all depths. Note: Depth is zero-indexed; `--depth 0` fetches top-level comments only (no replies), `--depth 1` fetches top-level comments and their direct replies, etc.
+- `--output <filename.json>` or `-o <filename.json>`: Specify the output JSON filename. If omitted, a name is generated based on post ID and title.
+- `--print`: Print the final JSON to the console instead of saving to a file.
+- `--verbose` or `-v`: Enable detailed DEBUG level logging to the console.
+- `--log-file <filepath>`: Save logs to the specified file (appends).
+- `--include-raw-media`: Include extensive raw media metadata from PRAW (e.g., all image resolutions, full gallery data). This can significantly increase file size. Off by default.
 
 **Examples:**
 
@@ -157,13 +172,14 @@ python reddit_extractor.py
 
 The script will prompt you for:
 
-* The Reddit post URL.
-* Comment fetching preference (Number, `all`, or `no`).
-* Comment sort order (if fetching comments).
-* Comment depth limit (if fetching comments). Remember, depth is zero-indexed (0 = top-level only).
-* Output filename (optional, leave blank to auto-generate).
-* Whether to print output to the console instead of saving.
-* Whether to include verbose raw media details (can greatly increase JSON size).
+- The Reddit post URL.
+- Comment fetching preference (Number, `all`, or `no`).
+- Comment sort order (if fetching comments).
+- Comment depth limit (if fetching comments). Remember, depth is zero-indexed (0 = top-level only).
+- Output filename (optional, leave blank to auto-generate).
+- Whether to print output to the console instead of saving.
+- Whether to include verbose raw media details (can greatly increase JSON size).
+- **Media Download Prompts (if applicable):** After the above steps, if downloadable media is detected in the post or comments, you will be asked if you want to download it and from where (post only, comments only, or both). See the [Media Download Feature](#media-download-feature) section for details.
 
 ## Output Format
 
@@ -256,45 +272,53 @@ The script outputs a JSON file containing structured information about the post 
 
 Key points about the structure:
 
-* **Timestamps:** `created_utc` provides the raw Unix epoch time, while `created_iso` offers a human-readable ISO 8601 format.
-* **Media:** `post_details.media_info` is a list containing objects for each detected media item (images, videos, embeds). The `type` field helps identify the kind of media. If the `--include-raw-media` flag is used, additional fields prefixed with `_raw_` containing extensive PRAW metadata will appear within `post_details`.
-* **Comments:** The `comments` list contains top-level comment objects. Each comment object has a `replies` field which is itself a list containing replies to *that* comment, creating a nested structure. The `depth` field indicates the nesting level (0 for direct replies to the post).
+- **Timestamps:** `created_utc` provides the raw Unix epoch time, while `created_iso` offers a human-readable ISO 8601 format.
+- **Media:** `post_details.media_info` is a list containing objects for each detected media item (images, videos, embeds). The `type` field helps identify the kind of media. If the `--include-raw-media` flag is used, additional fields prefixed with `_raw_` containing extensive PRAW metadata will appear within `post_details`.
+- **Comments:** The `comments` list contains top-level comment objects. Each comment object has a `replies` field which is itself a list containing replies to *that* comment, creating a nested structure. The `depth` field indicates the nesting level (0 for direct replies to the post).
+
+## Media Download Feature
+
+This script can optionally download media (images, GIFs, and some videos) from the main post and/or comments **when running in interactive mode.**
+
+**How it works:**
+
+- After the main data extraction is complete and the JSON output is ready (either printed or saved), the script checks for potential media URLs.
+- For the **main post**, it looks at the structured `media_info` within the `post_details` section of the JSON, extracting URLs for types like `image` and `reddit_video` (if they point directly to downloadable files like `.jpg`, `.png`, `.gif`, `.mp4`).
+- For **comments**, it scans the `body` text of each fetched comment (and its replies) for direct links to Reddit's media hosting domains (`i.redd.it`, `preview.redd.it`) that end in common image extensions (`.jpg`, `.jpeg`, `.png`, `.gif`).
+- If any potential media URLs are found, you will be prompted to confirm if you want to download them and specify the scope (post, comments, or both).
+- Downloaded media files are saved into a **new folder** created in the same directory as the output JSON file. This folder will have the **same name as the JSON file (without the `.json` extension)**. For example, if the output is saved as `my_post_output.json`, media will be saved in a folder called `my_post_output/`.
+
+**Limitations for Reddit Videos:**
+
+- Reddit-hosted videos downloaded by this script will **not have sound**. This is because Reddit stores video and audio as separate files/streams, and this script currently only downloads the primary video stream (typically the `.mp4` file found in the media info).
+- Images and GIFs are downloaded as expected.
 
 ## Technical Notes on Data Retrieval
 
 This script utilises the [PRAW (Python Reddit API Wrapper)](https://praw.readthedocs.io/en/stable/) library to interact with the official Reddit API. Understanding a little about how PRAW fetches data, particularly comments, can be helpful:
 
-* **Comment Limits (`--comments N`):** When you specify a limit for top-level comments, the script first sets `submission.comment_limit` in PRAW. This provides an initial hint to PRAW for its first API request for comments. However, to ensure all potential comments are considered (especially those hidden behind "load more comments" placeholders), the script then calls `submission.comments.replace_more(limit=None)`. This PRAW method makes further API calls if necessary to expand those placeholders and retrieve more comments. Finally, the script iterates through the fetched top-level comments and stops once your specified limit (`N`) is reached. So, it's a combination of PRAW's fetching capabilities and the script's own iteration and counting to meet your exact requirement.
+- **Comment Limits (`--comments N`):** When you specify a limit for top-level comments, the script first sets `submission.comment_limit` in PRAW. This provides an initial hint to PRAW for its first API request for comments. However, to ensure all potential comments are considered (especially those hidden behind "load more comments" placeholders), the script then calls `submission.comments.replace_more(limit=None)`. This PRAW method makes further API calls if necessary to expand those placeholders and retrieve more comments. Finally, the script iterates through the fetched top-level comments and stops once your specified limit (`N`) is reached. So, it's a combination of PRAW's fetching capabilities and the script's own iteration and counting to meet your exact requirement.
 
-* **Comment Depth (`--depth D`):** Control over comment reply depth is primarily handled by this script after PRAW fetches the comment data. When PRAW retrieves comments (and their replies via `replace_more()`), the Reddit API usually sends replies down to a certain default nesting level. PRAW does not offer a direct way to tell the API "only send replies N levels deep." Instead, this script recursively processes the comment tree provided by PRAW. If a reply's current depth in the tree (where 0 is a direct reply to the post, 1 is a reply to that, etc.) meets or exceeds your specified `--depth D`, the script includes that comment but provides an empty list for its `replies`. For example, `--depth 0` will give you only the top-level comments, and their `replies` field will be `[]`. `--depth 1` will give top-level comments, and their direct replies (depth 1 comments) will be included with their `replies` field set to `[]`.
+- **Comment Depth (`--depth D`):** Control over comment reply depth is primarily handled by this script after PRAW fetches the comment data. When PRAW retrieves comments (and their replies via `replace_more()`), the Reddit API usually sends replies down to a certain default nesting level. PRAW does not offer a direct way to tell the API "only send replies N levels deep." Instead, this script recursively processes the comment tree provided by PRAW. If a reply's current depth in the tree (where 0 is a direct reply to the post, 1 is a reply to that, etc.) meets or exceeds your specified `--depth D`, the script includes that comment but provides an empty list for its `replies`. For example, `--depth 0` will give you only the top-level comments, and their `replies` field will be `[]`. `--depth 1` will give top-level comments, and their direct replies (depth 1 comments) will be included with their `replies` field set to `[]`.
 
-* **PRAW's Role:** In essence, PRAW handles the complexities of direct API communication, authentication, and provides convenient Python objects representing Reddit posts, comments, etc. This script then intelligently uses these PRAW objects, directs PRAW to fetch further data where needed (like expanding comments), and then processes, filters, and structures this information into the final JSON output according to your specified options.
+- **PRAW's Role:** In essence, PRAW handles the complexities of direct API communication, authentication, and provides convenient Python objects representing Reddit posts, comments, etc. This script then intelligently uses these PRAW objects, directs PRAW to fetch further data where needed (like expanding comments), and then processes, filters, and structures this information into the final JSON output according to your specified options.
 
 For more in-depth information on PRAW itself, please refer to the [official PRAW documentation](https://praw.readthedocs.io/en/stable/).
 
 ## Troubleshooting
 
-* **Authentication Errors (`APIAuthenticationError`)**:
-  * Double-check your `REDDIT_CLIENT_ID` and `REDDIT_USER_AGENT` in your `.env` file.
-  * Ensure the `REDDIT_USER_AGENT` is unique and includes your Reddit username.
-  * If you have a `REDDIT_REFRESH_TOKEN` in your `.env` file, it might be invalid or expired. Try removing it (leave it blank) and re-running the script to go through the authorization process again and get a new refresh token.
-  * Confirm that the `REDIRECT_URI` in your Reddit app settings is exactly `http://localhost:8080`.
-* **Post Not Found (`PostRetrievalError`)**: Verify the Reddit URL is correct and the post hasn't been deleted or made private.
-* **Rate Limits**: If you encounter errors mentioning rate limits, wait a while before trying again. The script has a basic retry mechanism, but excessive requests can still be blocked.
-* **Dependencies Not Found (`ModuleNotFoundError`)**: Ensure you have activated the correct Conda environment or virtual environment (`source venv/bin/activate` or `conda activate <env_name>`) before running `pip install -r requirements.txt` and before running the script.
-* **File Saving Issues (`OutputError`)**: Check that you have write permissions in the directory where the script is trying to save the output file.
+- **Authentication Errors (`APIAuthenticationError`)**:
+  - Double-check your `REDDIT_CLIENT_ID` and `REDDIT_USER_AGENT` in your `.env` file.
+  - Ensure the `REDDIT_USER_AGENT` is unique and includes your Reddit username.
+  - If you have a `REDDIT_REFRESH_TOKEN` in your `.env` file, it might be invalid or expired. Try removing it (leave it blank) and re-running the script to go through the authorization process again and get a new refresh token.
+  - Confirm that the `REDIRECT_URI` in your Reddit app settings is exactly `http://localhost:8080`.
+- **Post Not Found (`PostRetrievalError`)**: Verify the Reddit URL is correct and the post hasn't been deleted or made private.
+- **Rate Limits**: If you encounter errors mentioning rate limits, wait a while before trying again. The script has a basic retry mechanism, but excessive requests can still be blocked.
+- **Dependencies Not Found (`ModuleNotFoundError`)**: Ensure you have activated the correct Conda environment or virtual environment (`source venv/bin/activate` or `conda activate <env_name>`) before running `pip install -r requirements.txt` and before running the script.
+- **File Saving Issues (`OutputError`)**: Check that you have write permissions in the directory where the script is trying to save the output file.
 
 For more detailed diagnostics, run the script with the `--verbose` flag and check the console output, or use `--log-file <filepath>` to save logs to a file.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-## Media Download Feature
-
-This script can optionally download media (images, GIFs, and some videos) from the main post and/or comments when running in interactive mode. Media files are saved to a folder named after the output JSON file.
-
-**Limitations for Reddit Videos:**
-
-* Reddit-hosted videos downloaded by this script will **not have sound**. This is because Reddit stores video and audio as separate files/streams, and this script only downloads the video stream (the .mp4 file).
-* Images and GIFs are downloaded as expected.
